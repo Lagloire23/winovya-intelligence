@@ -1,5 +1,5 @@
 [build]
-  command = "cd apps/web && npm ci && npm run build"
+  command = "node scripts/remove-bom.js && cd apps/web && npm ci && npm run build"
   publish = "apps/web/dist"
 
 [[redirects]]
