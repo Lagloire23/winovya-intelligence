@@ -1,6 +1,6 @@
 [build]
-  command = "echo Deploying static site"
-  publish = "apps/web"
+  command = "cd apps/web && npm ci && npm run build"
+  publish = "apps/web/dist"
 
 [[redirects]]
   from = "/*"

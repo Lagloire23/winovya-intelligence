@@ -1,4 +1,4 @@
-﻿export default function Navigation() {
+export default function Navigation() {
   return (
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 py-4">
