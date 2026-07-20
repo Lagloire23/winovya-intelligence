@@ -1,0 +1,49 @@
+name: Deploy Supabase Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/deploy-supabase.yml'
+  workflow_dispatch:
+
+env:
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+jobs:
+  deploy-migrations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Link Supabase Project
+        run: |
+          supabase link \
+            --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} \
+            --password ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Apply Migrations
+        run: supabase db push
+
+      - name: Deploy Edge Functions
+        run: |
+          supabase functions deploy cluster-alerts
+          supabase functions deploy detect-phases-and-score
+          supabase functions deploy match-offres
+
+      - name: Verify Deployment
+        run: |
+          supabase status
+          echo "✅ Migrations deployed successfully"

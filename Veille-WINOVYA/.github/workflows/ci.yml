@@ -1,0 +1,34 @@
+name: CI
+
+# Préparé dans le cadre du Sprint 0 — à valider avant activation réelle.
+# Objectif : fournir un "check" obligatoire que la protection de branche
+# `main` pourra référencer (GitHub exige qu'un workflow ait déjà tourné au
+# moins une fois avant de pouvoir le cocher comme "required status check").
+# Ce fichier ne modifie rien tant qu'il n'est pas poussé sur GitHub.
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [staging]
+
+jobs:
+  build-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build
+        env:
+          # Valeurs factices : ce build de CI ne sert qu'à vérifier que le
+          # code compile, il n'est jamais déployé.
+          VITE_APP_ENV: staging
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder-key

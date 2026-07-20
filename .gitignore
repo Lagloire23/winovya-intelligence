@@ -1,0 +1,37 @@
+﻿# Dependencies
+node_modules/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Bundles and archives
+*.bundle
+*.zip
+
+# Staging/preview files
+staging-current*/
+sprint*-*/ 
+bundle-verification/
+preview_*.png
+
+# Temp
+~$*.pptx
+.tmp/

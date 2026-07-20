@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: 240 10% 10%;
+  }
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-white text-[hsl(240,10%,10%)] font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  .card-winovya {
+    @apply bg-white border border-[hsl(217,6%,90%)] rounded-lg shadow-card;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-primary text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-neutral text-[hsl(217,42%,45%)] font-semibold text-sm px-5 py-2.5 rounded-lg border border-[hsl(217,6%,90%)] hover:bg-white transition;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-green-deep text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .badge {
+    @apply inline-flex items-center bg-brand-neutral text-brand-primary text-xs font-semibold px-3 py-1 rounded-sm border border-[hsl(217,6%,90%)];
+  }
+  .input-winovya {
+    @apply w-full rounded-md border border-[hsl(217,6%,90%)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue-bright/40 focus:border-brand-blue-bright;
+  }
+}

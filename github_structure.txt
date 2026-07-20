@@ -1,0 +1,197 @@
+WINOVYA Intelligence Platform — Full Stack Structure
+======================================================
+
+Repository Structure:
+└── winovya-intelligence-platform/
+    ├── .github/
+    │   └── workflows/
+    │       ├── deploy-supabase.yml        # Deploy Supabase migrations
+    │       └── deploy-netlify.yml         # Deploy frontend to Netlify
+    │
+    ├── supabase/
+    │   ├── migrations/
+    │   │   ├── 001_create_opportunites_tables.sql
+    │   │   ├── 002_seed_entreprise_offres.sql
+    │   │   └── 003_add_sample_data.sql
+    │   │
+    │   └── functions/
+    │       ├── cluster-alerts/
+    │       │   └── index.ts               # Edge Function #1: Clustering IA
+    │       ├── detect-phases-and-score/
+    │       │   └── index.ts               # Edge Function #2: Phase detection + scoring
+    │       ├── match-offres/
+    │       │   └── index.ts               # Edge Function #3: Matching services
+    │       └── webhooks/
+    │           └── on-new-alert.ts        # Trigger clustering on new alert
+    │
+    ├── apps/
+    │   └── web/
+    │       ├── public/
+    │       │   ├── index.html
+    │       │   ├── favicon.ico
+    │       │   └── logo.svg
+    │       │
+    │       ├── src/
+    │       │   ├── api/
+    │       │   │   ├── opportunites.ts    # GET /opportunites, POST /cluster
+    │       │   │   ├── phases.ts          # GET /phases/:opportunite_id
+    │       │   │   └── supabase.ts        # Client Supabase
+    │       │   │
+    │       │   ├── pages/
+    │       │   │   ├── Home.tsx           # Dashboard opportunités (tableau)
+    │       │   │   ├── OpportunityDetail.tsx  # Page détail + chronologie
+    │       │   │   ├── OpportunityTimeline.tsx # Composant chronologie
+    │       │   │   └── Settings.tsx       # Config offres entreprise
+    │       │   │
+    │       │   ├── components/
+    │       │   │   ├── OpportunityTable.tsx
+    │       │   │   ├── ScoreCard.tsx
+    │       │   │   ├── PhaseTimeline.tsx
+    │       │   │   └── AlertList.tsx
+    │       │   │
+    │       │   ├── hooks/
+    │       │   │   ├── useOpportunities.ts
+    │       │   │   ├── usePhases.ts
+    │       │   │   └── useOffres.ts
+    │       │   │
+    │       │   ├── styles/
+    │       │   │   ├── globals.css
+    │       │   │   └── tailwind.config.js
+    │       │   │
+    │       │   ├── utils/
+    │       │   │   ├── formatters.ts
+    │       │   │   ├── scoring.ts
+    │       │   │   └── dates.ts
+    │       │   │
+    │       │   ├── App.tsx
+    │       │   └── main.tsx
+    │       │
+    │       ├── package.json
+    │       ├── tsconfig.json
+    │       ├── vite.config.ts
+    │       └── tailwind.config.js
+    │
+    ├── .env.example              # Template variables d'environnement
+    ├── .gitignore
+    ├── README.md                 # Documentation complète
+    ├── DEPLOYMENT.md             # Guide déploiement Netlify + Supabase
+    ├── supabase.json             # Config Supabase locale
+    ├── netlify.toml              # Config Netlify
+    └── package.json              # Root package.json
+
+═════════════════════════════════════════════════════════════════
+Key Technologies
+═════════════════════════════════════════════════════════════════
+- Frontend: React 18 + TypeScript + Tailwind CSS + Vite
+- Backend: Supabase (PostgreSQL + Edge Functions) + Node.js
+- Deployment: Netlify (frontend) + Supabase Cloud (backend)
+- CI/CD: GitHub Actions
+- Database: PostgreSQL with TypeScript generated types
+- Auth: Supabase Auth (optional, for team access)
+
+═════════════════════════════════════════════════════════════════
+Workflow
+═════════════════════════════════════════════════════════════════
+
+1. LOCAL DEVELOPMENT
+   $ npm install
+   $ npm run dev              # Runs Vite + local Supabase
+   $ npm run test
+
+2. DATABASE MIGRATIONS
+   $ supabase migration new   # Create new migration
+   $ supabase db push         # Apply migrations locally
+   $ supabase db remote-push  # Push to production
+
+3. EDGE FUNCTIONS
+   $ supabase functions deploy cluster-alerts
+   $ supabase functions deploy detect-phases-and-score
+
+4. DEPLOYMENT TO PRODUCTION
+   $ git push origin main      # Triggers GitHub Actions
+   → Supabase migrations run automatically
+   → Netlify builds and deploys frontend
+
+═════════════════════════════════════════════════════════════════
+Environment Variables (.env.local for dev, .env for prod)
+═════════════════════════════════════════════════════════════════
+
+# Supabase
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGc...
+SUPABASE_ACCESS_TOKEN=sbp_...
+SUPABASE_PROJECT_ID=your-project-id
+
+# GitHub Actions
+SUPABASE_DB_PASSWORD=your-db-password
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+
+# Netlify
+NETLIFY_AUTH_TOKEN=your-netlify-token
+NETLIFY_SITE_ID=your-site-id
+
+═════════════════════════════════════════════════════════════════
+Pages & Features
+═════════════════════════════════════════════════════════════════
+
+1. DASHBOARD (Home)
+   - Tableau opportunités (nom, acteur, phase, score, nb alertes, date)
+   - Filtres: scoring, pattern_type, statut, date range
+   - Tri: par score DESC, par phase, par date
+   - CTA: "Voir détail", "Assigner", "Archiver"
+
+2. OPPORTUNITY DETAIL
+   - Carte en-tête: nom, acteur, localisation, scoring, phase
+   - Section Pertinence par entreprise (tableau)
+   - Section Chronologie (timeline alertes par date)
+   - Section Phases détectées (timeline phases + confiance)
+   - Section Contacts décideurs (liés via alerte_decideurs)
+   - CTA: "Mettre à jour scoring", "Assigner équipe"
+
+3. SETTINGS
+   - Gérer offres_services entreprise
+   - Mapping type_opportunite → services applicables
+   - Profil utilisateur + équipe
+
+═════════════════════════════════════════════════════════════════
+Deployment Checklist
+═════════════════════════════════════════════════════════════════
+
+SUPABASE (Backend)
+  ☐ Create Supabase project at supabase.com
+  ☐ Run migration 001 (opportunites tables)
+  ☐ Deploy Edge Functions (cluster-alerts, detect-phases-and-score)
+  ☐ Generate anon key + service role key
+  ☐ Configure RLS policies (if needed)
+
+GITHUB
+  ☐ Create repo winovya-intelligence-platform
+  ☐ Push code
+  ☐ Add Secrets: SUPABASE_ACCESS_TOKEN, SUPABASE_SERVICE_ROLE_KEY, etc.
+  ☐ Enable Actions
+
+NETLIFY
+  ☐ Connect repo to Netlify
+  ☐ Set Build command: npm run build
+  ☐ Set Publish directory: dist/
+  ☐ Add environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+  ☐ Deploy
+
+CI/CD
+  ☐ GitHub Actions trigger on push to main
+  ☐ Run tests + migrations
+  ☐ Netlify auto-deploys on merge
+
+═════════════════════════════════════════════════════════════════
+Success Indicators
+═════════════════════════════════════════════════════════════════
+
+✓ Dashboard charges 414 alertes → 50-80 opportunités
+✓ Chaque opportunité a au moins 1 phase détectée
+✓ Scoring "Très haute" pour signaux précoces (macro, foncier)
+✓ Scoring "Basse" pour annonces officielles
+✓ Timeline affiche progression phases dans le temps
+✓ Contacts décideurs remplis pour 70%+ opportunités
+✓ Mobile-friendly: fonctionne sur tablet + smartphone
+
+═════════════════════════════════════════════════════════════════

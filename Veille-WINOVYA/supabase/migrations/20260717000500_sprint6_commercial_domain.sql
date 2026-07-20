@@ -1,0 +1,49 @@
+-- Sprint 6 — Domaine métier des opportunités (MVP).
+--
+-- N'ajoute AUCUNE règle métier au moteur de corrélation (Sprint 2.1), au
+-- pipeline automatique / trigger Sprint 3, à process_alert_opportunity,
+-- à DossierEnrichmentService (Sprint 4) ni à la couche Query (Sprint 5,
+-- veille.opportunite_dossier) : tous ces objets restent strictement
+-- inchangés. Ce fichier ajoute uniquement, de façon additive :
+--   1. 2 valeurs d'enum (QUALIFYING, PROPOSAL) sur le type existant
+--      veille.statut_opportunite (Sprint 1), sans en retirer aucune ;
+--   2. 2 colonnes additives sur veille.opportunites (assigned_to,
+--      assigned_at) ;
+--   3. 2 nouvelles tables (opportunite_notes, opportunite_activity_log) ;
+--   4. 2 nouveaux triggers AUTOMATIQUES ET ADDITIFS qui journalisent les
+--      événements métier (création, changement de statut, assignation,
+--      note ajoutée/modifiée/supprimée) sans jamais appeler ni modifier
+--      process_alert_opportunity ou le moteur de corrélation — même
+--      principe que les triggers Sprint 3 sur pertinence_entreprise :
+--      une fonction SECURITY DEFINER strictement additive, greffée sur
+--      un événement déjà existant, qui n'altère jamais la donnée qui l'a
+--      déclenchée.
+--
+-- Audit préalable (Phase 1) :
+--   - veille.statut_opportunite existe déjà (Sprint 1) avec NEW,
+--     QUALIFIED, IN_PROGRESS, WON, LOST, ARCHIVED. Le cycle de vie
+--     Sprint 6 autorise NEW, QUALIFYING, QUALIFIED, PROPOSAL, WON, LOST,
+--     ARCHIVED. QUALIFYING et PROPOSAL sont ajoutées (additif, aucune
+--     valeur retirée : PostgreSQL ne permet de toute façon pas de
+--     retirer une valeur d'enum simplement). IN_PROGRESS reste présente
+--     dans le type pour compatibilité mais n'appartient pas au cycle de
+--     vie Sprint 6 : elle n'est plus utilisée par aucun code de ce
+--     sprint ni proposée dans les transitions (voir
+--     src/lib/opportunities/commercial/lifecycle.ts) — documenté comme
+--     limitation connue (rapport final §11).
+--   - veille.opportunites est vide à ce jour (0 ligne) : aucune donnée
+--     existante à migrer.
+--   - Aucune colonne assigned_to/assigned_at, aucune table de notes ni
+--     de journal d'activité n'existaient avant ce sprint
+--     (information_schema.tables / columns vérifié).
+--   - veille.profiles n'autorise la lecture QUE de sa propre ligne
+--     (`read own profile`, qual: id = auth.uid()) sauf pour un admin
+--     (`admin manage profiles`, ALL, is_admin()). Conséquence directe :
+--     la couche métier Sprint 6 ne doit jamais tenter de résoudre le nom
+--     d'un utilisateur assigné autre que l'appelant lui-même côté
+--     Frontend sans passer par un rôle admin — documenté (rapport final
+--     §11, docs/opportunity-commercial-domain.md §8).
+
+-- 1. Extension additive de l'enum existant (Sprint 1) ----------------------
+alter type veille.statut_opportunite add value if not exists 'QUALIFYING';
+alter type veille.statut_opportunite add value if not exists 'PROPOSAL';

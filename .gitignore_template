@@ -1,0 +1,51 @@
+# Environment
+.env
+.env.local
+.env.*.local
+.DS_Store
+
+# Dependencies
+node_modules/
+npm-debug.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+.next/
+out/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+.history/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Supabase
+supabase/.branches/
+supabase/seed.sql
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Cache
+.cache/
+.eslintcache
