@@ -1,0 +1,40 @@
+name: Remove BOM from files
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  remove-bom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove BOM from files
+        run: |
+          for file in apps/web/package.json netlify.toml apps/web/tsconfig.json .editorconfig; do
+            if [ -f "$file" ]; then
+              # Remove BOM if present
+              sed -i '1s/^\xef\xbb\xbf//' "$file"
+              echo "✅ Cleaned $file"
+            fi
+          done
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if git diff --quiet; then
+            echo "No changes needed"
+          else
+            git add -A
+            git commit -m "fix: Remove BOM from files [skip ci]"
+            git push
+          fi
