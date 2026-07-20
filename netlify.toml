@@ -1,5 +1,5 @@
 ﻿[build]
-  command = "echo 'Deploying static site'"
+  command = "echo Deploying static site"
   publish = "apps/web"
 
 [[redirects]]
