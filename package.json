@@ -1,0 +1,13 @@
+﻿{
+  "name": "winovya-intelligence",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd apps/web && npm run dev",
+    "build": "cd apps/web && npm run build",
+    "preview": "cd apps/web && npm run preview"
+  },
+  "keywords": ["winovya", "intelligence", "opportunities", "clustering"],
+  "author": "WINOVYA",
+  "license": "MIT"
+}
