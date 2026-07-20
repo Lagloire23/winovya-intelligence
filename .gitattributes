@@ -1,0 +1,15 @@
+* text=auto
+
+# Force UTF-8 sans BOM pour tous les fichiers texte critiques
+*.json diff=json text eol=lf working-tree-encoding=UTF-8
+*.toml text eol=lf working-tree-encoding=UTF-8
+*.html text eol=lf working-tree-encoding=UTF-8
+*.ts text eol=lf working-tree-encoding=UTF-8
+*.tsx text eol=lf working-tree-encoding=UTF-8
+*.js text eol=lf working-tree-encoding=UTF-8
+*.css text eol=lf working-tree-encoding=UTF-8
+
+# Ne pas modifier les fichiers binaires
+*.png binary
+*.jpg binary
+*.lock binary
