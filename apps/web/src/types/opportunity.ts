@@ -3,7 +3,7 @@
  * Basé sur Sprint 2/2.1 (Backend) + Sprint 9 (Dashboard)
  */
 
-export type OpportunityStatus = 'PROSPECT' | 'IN_PROGRESS' | 'NEGOTIATION' | 'WON' | 'LOST' | 'ARCHIVED'
+export type OpportunityStatus = 'PROSPECT' | 'NEGOTIATION' | 'WON' | 'LOST' | 'ARCHIVED'
 
 export type ConfidenceLevel = 'low' | 'medium' | 'high'
 
