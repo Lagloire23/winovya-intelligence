@@ -1,4 +1,4 @@
-﻿[build]
+[build]
   command = "echo Deploying static site"
   publish = "apps/web"
 
