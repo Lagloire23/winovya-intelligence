@@ -1,73 +1,8 @@
-# Netlify Configuration — WINOVYA Intelligence Platform
+﻿[build]
+  command = "echo 'Deploying static site'"
+  publish = "apps/web"
 
-[build]
-  command = "npm run build"
-  publish = "apps/web/dist"
-  functions = "supabase/functions"
-  edge_functions = "supabase/functions"
-
-[build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
-  CI = "true"
-
-# Redirects for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# Headers
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-
-# Context-specific settings
-[context.production]
-  environment = { VITE_ENVIRONMENT = "production" }
-
-[context.deploy-preview]
-  command = "npm run build"
-  environment = { VITE_ENVIRONMENT = "preview" }
-
-[context.branch-deploy]
-  command = "npm run build"
-  environment = { VITE_ENVIRONMENT = "staging" }
-
-# Plugins
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-
-# Environment variables (set in Netlify UI)
-# VITE_SUPABASE_URL=...
-# VITE_SUPABASE_ANON_KEY=...
-# SUPABASE_ACCESS_TOKEN=... (for Edge Functions deployment)
-
-[dev]
-  command = "npm run dev"
-  port = 3000
-
-# Edge Functions configuration
-[[edge_functions]]
-  function = "cluster-alerts"
-  path = "/api/cluster"
-
-[[edge_functions]]
-  function = "detect-phases-and-score"
-  path = "/api/score"
-
-[[edge_functions]]
-  function = "match-offres"
-  path = "/api/match"
