@@ -1,0 +1,91 @@
+================================================================================
+WINOVYA NETLIFY DEPLOYMENT - BOM FIX COMPLETE
+================================================================================
+
+WHAT WAS DONE:
+==============
+✓ Cloned the repo fresh from GitHub
+✓ Removed all critical files from git index (git rm --cached)
+✓ Recreated all 8 critical files WITHOUT BOM using bash heredoc:
+  - netlify.toml
+  - .gitattributes (simplified, removed problematic working-tree-encoding)
+  - apps/web/package.json
+  - apps/web/package-lock.json
+  - apps/web/tsconfig.json
+  - apps/web/tsconfig.node.json
+  - apps/web/index.html
+  - apps/web/vite.config.ts
+✓ Verified with od -tx1 that NO file contains BOM bytes (ef bb bf)
+✓ Made a clean commit with all fixes
+
+COMMIT DETAILS:
+===============
+Commit: ee899fe
+Message: fix(netlify): Aggressively remove BOM - recreate all critical files from git index
+
+The commit is ready and contains:
+- All files without BOM
+- Simplified .gitattributes
+- No problematic working-tree-encoding attributes
+
+NEXT STEP - PUSH TO GITHUB:
+============================
+The cleaned repo is in: winovya-fix-repo/
+
+To deploy:
+
+OPTION 1 - Using PowerShell (Windows):
+   1. Navigate to your local winovya-intelligence repo: cd C:\path\to\winovya-intelligence
+   2. Replace its contents with files from winovya-fix-repo (or merge)
+   3. Run: .\PUSH_TO_GITHUB.ps1
+   
+OPTION 2 - Using Bash/Git Bash:
+   1. Navigate to your local winovya-intelligence repo: cd ~/path/to/winovya-intelligence
+   2. Replace its contents with files from winovya-fix-repo (or merge)
+   3. Run: bash PUSH_TO_GITHUB.sh
+
+OPTION 3 - Manual push:
+   1. Navigate to your local winovya-intelligence repo
+   2. Run: git push --force-with-lease origin main
+
+WHAT HAPPENS AFTER PUSH:
+=========================
+1. GitHub will receive the clean commit
+2. Netlify will detect the change and automatically start a new build
+3. The build should now SUCCEED (no "package.json contains BOM" error)
+4. Your site will be deployed within 1-2 minutes
+
+VERIFY SUCCESS:
+================
+- Check Netlify dashboard: https://app.netlify.com
+- Look for a new deployment with status "Published"
+- The deployment should NOT have "package.json contains BOM" error
+
+TROUBLESHOOTING:
+=================
+If push fails with "Permission denied":
+  - Make sure you're authenticated to GitHub
+  - Use: git config --global user.name "Your Name"
+  - Use: git config --global user.email "your@email.com"
+
+If Netlify still fails:
+  - Clear Netlify cache: Settings > General > Clear cache and rebuild
+  - Check Netlify build logs at https://app.netlify.com
+  - Contact Netlify support with the build logs
+
+KEY INSIGHT:
+=============
+The BOM issue was persistent because:
+1. Files had UTF-8 BOM markers (ef bb bf bytes)
+2. Previous .gitattributes attempted to fix it with working-tree-encoding
+3. The fix didn't work because git wasn't configured correctly
+
+The NEW solution:
+1. Git index was completely cleaned (git rm --cached)
+2. Files were recreated ONLY via bash (no PowerShell/Windows encoding)
+3. Simplified .gitattributes without problematic attributes
+4. This ensures NO BOM can be introduced
+
+QUESTIONS?
+===========
+Everything is ready. Just push and Netlify will rebuild!

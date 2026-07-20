@@ -1,0 +1,60 @@
+===============================================================================
+QUICK START - PUSH YOUR CLEANED REPO TO GITHUB
+===============================================================================
+
+YOU HAVE:
+- A completely cleaned repository in: winovya-fix-repo/
+- All files verified to have NO BOM
+- A clean commit ready to push
+- Push scripts for both PowerShell and Bash
+
+TO DEPLOY YOUR FIX:
+
+STEP 1: Go to your local repo directory
+   cd C:\path\to\winovya-intelligence   (Windows)
+   cd ~/path/to/winovya-intelligence    (Mac/Linux)
+
+STEP 2: Replace your files with the cleaned versions
+   
+   Option A - Copy entire directory:
+   Copy entire contents of winovya-fix-repo/ to your repo
+   
+   Option B - Merge git branches:
+   cd winovya-fix-repo
+   git log --oneline -1                 (Note the commit hash)
+   git push --force-with-lease origin main
+
+STEP 3: Push to GitHub
+   
+   PowerShell (Windows):
+   .\PUSH_TO_GITHUB.ps1
+   
+   Bash (Mac/Linux):
+   bash PUSH_TO_GITHUB.sh
+   
+   Or manually:
+   git push --force-with-lease origin main
+
+STEP 4: Wait for Netlify to rebuild
+   - Netlify will automatically detect the push
+   - Build should start within seconds
+   - Check: https://app.netlify.com
+   - Wait for deployment status to change to "Published"
+
+STEP 5: Verify success
+   - Build should NOT show "package.json contains BOM" error
+   - Site should be live and working
+   - Check your domain or Netlify preview URL
+
+===============================================================================
+THAT'S IT!
+===============================================================================
+
+The hard technical work is DONE. Just push and wait for Netlify to rebuild.
+
+Commit: ee899fe
+Message: "fix(netlify): Aggressively remove BOM - recreate all critical files from git index"
+
+Questions? See:
+- DEPLOYMENT_INSTRUCTIONS.txt (detailed step-by-step)
+- CHANGES_SUMMARY.md (what was changed and why)

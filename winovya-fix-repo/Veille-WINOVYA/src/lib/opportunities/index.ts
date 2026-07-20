@@ -1,0 +1,6 @@
+export * from './types'
+export { OpportunityMapper } from './OpportunityMapper'
+export { OpportunityRepository } from './OpportunityRepository'
+export * as OpportunityDossier from './dossier'
+export * as OpportunityQuery from './query'
+export * as OpportunityCommercial from './commercial'
