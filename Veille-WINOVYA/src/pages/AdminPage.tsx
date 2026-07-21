@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { Loader2, UserPlus, Users, Building2, Check, Pencil } from 'lucide-react'
+import { Loader2, UserPlus, Users, Building2, Check, Pencil, Zap } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Entreprise, Profile, ProfileRole } from '../lib/types'
 
 export function AdminPage() {
-  const [tab, setTab] = useState<'users' | 'entreprises'>('users')
+  const [tab, setTab] = useState<'users' | 'entreprises' | 'clustering'>('users')
 
   return (
     <div>
@@ -32,9 +32,18 @@ export function AdminPage() {
           <Building2 size={15} />
           Entreprises
         </button>
+        <button
+          onClick={() => setTab('clustering')}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition ${
+            tab === 'clustering' ? 'bg-brand-primary text-white' : 'bg-white border border-[hsl(217,6%,90%)] hover:bg-brand-neutral'
+          }`}
+        >
+          <Zap size={15} />
+          Clustering
+        </button>
       </div>
 
-      {tab === 'users' ? <UsersTab /> : <EntreprisesTab />}
+      {tab === 'users' ? <UsersTab /> : tab === 'entreprises' ? <EntreprisesTab /> : <ClusteringTab />}
     </div>
   )
 }
@@ -411,6 +420,75 @@ function EntrepriseEditCard({
         <button onClick={handleSave} disabled={saving} className="btn-primary">
           {saving && <Loader2 className="animate-spin" size={16} />}
           Enregistrer
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ClusteringTab() {
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function runClustering() {
+    setLoading(true)
+    setError(null)
+    setResult(null)
+
+    try {
+      const response = await fetch('/run-clustering', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Erreur lors du clustering')
+        return
+      }
+
+      setResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur inconnue')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="card-winovya p-6">
+        <h2 className="text-lg font-heading font-bold mb-2">Pipeline de Clustering</h2>
+        <p className="text-sm text-[hsl(217,4%,46%)] mb-4">
+          Déclenche le clustering intelligent de tous les alertes pour créer des opportunités
+        </p>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 rounded text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
+        {result && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 rounded text-sm text-green-800 space-y-1">
+            <p className="font-medium">✓ Clustering réussi</p>
+            <p>Alertes traitées: {result.data?.total_alerts_processed}</p>
+            <p>Patterns utilisés: {result.data?.total_patterns}</p>
+            <p>Entreprises: {result.data?.enterprises_processed}</p>
+          </div>
+        )}
+
+        <button
+          onClick={runClustering}
+          disabled={loading}
+          className="btn-primary"
+        >
+          {loading && <Loader2 className="animate-spin" size={16} />}
+          {loading ? 'Clustering en cours...' : 'Lancer le clustering'}
         </button>
       </div>
     </div>
