@@ -53,7 +53,7 @@ export function DashboardPage() {
             alerte_decideurs(decideurs(*))`
           )
           .order('date_publication', { ascending: false })
-          .limit(500),
+          .limit(600),
       ])
 
       if (entErr || alErr) {
