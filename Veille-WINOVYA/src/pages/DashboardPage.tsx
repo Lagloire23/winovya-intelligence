@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, Loader2, Inbox } from 'lucide-react'
+import { Search, Loader2, Inbox, ChevronLeft, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useDashboardNav } from '../contexts/DashboardNavContext'
@@ -8,6 +8,8 @@ import type { AlerteWithRelations, Entreprise, ScorePertinence } from '../lib/ty
 import { AlertRow } from '../components/AlertRow'
 import { AppSidebar } from '../components/AppSidebar'
 import { SCORE_ORDER, SCORE_KPI_STYLE, CATEGORY_LABELS } from '../lib/displayHelpers'
+
+const ALERTS_PER_PAGE = 100
 
 export function DashboardPage() {
   const { profile } = useAuth()
@@ -25,6 +27,7 @@ export function DashboardPage() {
   const [entreprises, setEntreprises] = useState<Entreprise[]>([])
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -53,7 +56,7 @@ export function DashboardPage() {
             alerte_decideurs(decideurs(*))`
           )
           .order('date_publication', { ascending: false })
-          .limit(600),
+          .limit(5000), // Load a large batch for client-side filtering & pagination
       ])
 
       if (entErr || alErr) {
@@ -77,6 +80,7 @@ export function DashboardPage() {
         decideurs: (row.alerte_decideurs || []).map((ad: any) => ad.decideurs).filter(Boolean),
       }))
       setAlertes(normalized)
+      setCurrentPage(1) // Reset to first page on reload
       setLoading(false)
 
       // Default entreprise selection: member -> their own entreprise, admin -> first one.
@@ -93,7 +97,8 @@ export function DashboardPage() {
   // Collapse any expanded alert row whenever the active filter view changes.
   useEffect(() => {
     setExpandedId(null)
-  }, [bucket, categorie])
+    setCurrentPage(1) // Reset pagination on filter change
+  }, [bucket, categorie, region, departement, typeOpp, score, search])
 
   // Deep-link support: when arriving via ?alert=<id> (e.g. from an
   // assignation email, magic-link or invite redirect), jump straight to that
@@ -105,7 +110,6 @@ export function DashboardPage() {
     if (!targetId) return
     const target = alertes.find((a) => a.id === targetId)
     if (!target) return
-
     const pert = target.pertinence_entreprise[0]
     setActiveEntreprise(pert ? pert.entreprise_id : '__all')
     reset()
@@ -115,7 +119,7 @@ export function DashboardPage() {
     setTypeOpp('__all')
     setScore('__all')
     setExpandedId(targetId)
-
+    setCurrentPage(1)
     const timer = setTimeout(() => {
       document.getElementById(`alerte-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 350)
@@ -129,6 +133,7 @@ export function DashboardPage() {
 
   const activeEntrepriseObj = entreprises.find((e) => e.id === activeEntreprise)
   const activeEntrepriseLabel = activeEntreprise === '__all' ? 'Toutes les entreprises' : activeEntrepriseObj?.name || ''
+
   // TEMPORAIRE (dev/QA) : sélecteur ouvert à tous les rôles pour tester l'affichage
   // par entreprise. À supprimer avant mise en prod finale et remettre le filtre
   // `isMember ? entreprises.filter((e) => e.id === profile?.entreprise_id) : entreprises`.
@@ -236,12 +241,17 @@ export function DashboardPage() {
     return sorted
   }, [forEntreprise, bucket, categorie, region, departement, typeOpp, score, search, sortDir, activeEntreprise])
 
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / ALERTS_PER_PAGE)
+  const startIdx = (currentPage - 1) * ALERTS_PER_PAGE
+  const endIdx = startIdx + ALERTS_PER_PAGE
+  const displayedAlertes = filtered.slice(startIdx, endIdx)
+
   return (
     <div>
       <div className="lg:hidden mb-5 card-winovya p-3">
         <AppSidebar />
       </div>
-
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-2xl font-heading font-bold text-brand-navy mb-1">Opportunités {activeEntrepriseLabel}</h1>
@@ -250,7 +260,6 @@ export function DashboardPage() {
           secteurs d'intervention.
         </p>
       </div>
-
       {/* Entreprise selector */}
       {visibleEntreprises.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 mb-5 card-winovya p-3">
@@ -273,7 +282,6 @@ export function DashboardPage() {
           </select>
         </div>
       )}
-
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
         <div className="card-winovya p-3 border-brand-primary/30">
@@ -287,9 +295,7 @@ export function DashboardPage() {
           </div>
         ))}
       </div>
-
       {errorMsg && <div className="card-winovya p-4 mb-6 border-red-200 bg-red-50 text-red-700 text-sm">{errorMsg}</div>}
-
       <div>
         {/* Filter bar — row 1: search only */}
         <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -309,7 +315,6 @@ export function DashboardPage() {
             <Search size={13} /> Rechercher
           </button>
         </div>
-
         {/* Row 2: tous les filtres + tri + compteur, sur une seule ligne */}
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <select
@@ -384,7 +389,6 @@ export function DashboardPage() {
             {filtered.length} / {forEntreprise.length} alertes
           </span>
         </div>
-
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 className="animate-spin text-brand-primary" size={28} />
@@ -395,20 +399,46 @@ export function DashboardPage() {
             <p className="text-sm">Aucune alerte ne correspond à ces filtres.</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {filtered.map((a, i) => (
-              <AlertRow
-                key={a.id}
-                alerte={a}
-                entrepriseId={activeEntreprise}
-                entreprises={entreprises}
-                index={i + 1}
-                expanded={expandedId === a.id}
-                onToggle={() => setExpandedId(expandedId === a.id ? null : a.id)}
-                onChanged={handleChanged}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-2">
+              {displayedAlertes.map((a, i) => (
+                <AlertRow
+                  key={a.id}
+                  alerte={a}
+                  entrepriseId={activeEntreprise}
+                  entreprises={entreprises}
+                  index={startIdx + i + 1}
+                  expanded={expandedId === a.id}
+                  onToggle={() => setExpandedId(expandedId === a.id ? null : a.id)}
+                  onChanged={handleChanged}
+                />
+              ))}
+            </div>
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6 py-4">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-brand-navy/20 text-brand-navy disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-navy/5 transition"
+                >
+                  <ChevronLeft size={16} />
+                  Précédent
+                </button>
+                <span className="text-sm font-medium text-brand-navy">
+                  Page {currentPage} sur {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-brand-navy/20 text-brand-navy disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-navy/5 transition"
+                >
+                  Suivant
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
