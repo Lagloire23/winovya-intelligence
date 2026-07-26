@@ -83,12 +83,8 @@ export function DashboardPage() {
       setCurrentPage(1) // Reset to first page on reload
       setLoading(false)
 
-      // Default entreprise selection: member -> their own entreprise, admin -> first one.
-      if (isMember && profile?.entreprise_id) {
-        setActiveEntreprise(profile.entreprise_id)
-      } else if (ents.length > 0) {
-        setActiveEntreprise((prev) => prev || ents[0].id)
-      }
+      // Default: show all enterprises (user can filter by selecting one)
+      setActiveEntreprise('__all')
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -26,7 +26,7 @@ interface MenuItem {
 }
 
 const INTELLIGENCE_ITEMS: MenuItem[] = [
-  { key: 'NOUVEAU', label: 'Boîte de réception', icon: Inbox, kind: 'bucket', value: 'NOUVEAU' },
+  { key: 'NOUVEAU', label: 'Alertes', icon: Inbox, kind: 'bucket', value: '__all' },
   { key: 'ASSIGNE', label: 'Assigné', icon: UserCheck, kind: 'bucket', value: 'ASSIGNE' },
   { key: 'TRAITE', label: 'Traité', icon: CheckCircle2, kind: 'bucket', value: 'TRAITE' },
   { key: 'ARCHIVE', label: 'Archivé', icon: Archive, kind: 'bucket', value: 'ARCHIVE' },
